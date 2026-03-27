@@ -1,0 +1,22 @@
+diff --git a/src/sound/iremga20.c b/src/sound/iremga20.c
+index 6855e638..1d345e72 100644
+--- a/src/sound/iremga20.c
++++ b/src/sound/iremga20.c
+@@ -74,7 +74,7 @@ void IremGA20_update( void *param, stream_sample_t **inputs, stream_sample_t **b
+ {
+ 	struct IremGA20_chip_def *chip = param;
+ 	UINT32 rate[4], pos[4], end[4], vol[4], play[4];
+-	UINT32 esi;
++	__int64_t esi;
+ 	stream_sample_t *edi, *ebp;
+ 	int eax, ebx, ecx, edx;
+ 
+@@ -89,7 +89,7 @@ void IremGA20_update( void *param, stream_sample_t **inputs, stream_sample_t **b
+ 	}
+ 
+ 	ecx = length;
+-	esi = (UINT32)chip->rom;
++	esi = (__int64_t)chip->rom;
+ 	edi = buffer[0];
+ 	ebp = buffer[1];
+ 	edi += ecx;
