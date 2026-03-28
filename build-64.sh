@@ -52,24 +52,35 @@ make -j$(nproc) CC="$CC" CXX="$CXX"
 echo ">>> ccache stats:"
 ccache -s
 
-# --- Output ---
-echo ">>> Preparing Output..."
-mkdir -p "$OUT_DIR/bin" "$OUT_DIR/doc" "$OUT_DIR/lib" "$OUT_DIR/share"
+# --- Output Preparation ---
+echo ">>> Preparing Output: Emu/ARCADE/"
+mkdir -p "$OUT_DIR"
 
-# Check common binary locations
-if [ -f "advmame" ]; then
-    cp advmame "$OUT_DIR/bin/advmame.64"
-    $STRIP "$OUT_DIR/bin/advmame.64"
-elif [ -f "obj/mame/linux/blend/advmame" ]; then
-    cp obj/mame/linux/blend/advmame "$OUT_DIR/bin/advmame.64"
-    $STRIP "$OUT_DIR/bin/advmame.64"
-else
-    echo "Error: advmame binary not found!"
-    exit 1
+# 1. advmame: Copy, Strip, and Compress into advmame.7z
+if [ -f obj/mame/linux/blend/advmame ]; then
+    cp obj/mame/linux/blend/advmame "$OUT_DIR/advmame"
+    $STRIP "$OUT_DIR/advmame"
+    cd "$OUT_DIR"
+    # Create internal zip/7z with original name
+    7z a -t7z -m0=lzma2 -mx=9 advmame.7z advmame
+    rm advmame
+    cd -
 fi
 
+# 2. advj: Copy and Strip to ARCADE (Original Name)
+if [ -f obj/j/linux/blend/advj ]; then
+    cp obj/j/linux/blend/advj "$OUT_DIR/advj"
+    $STRIP "$OUT_DIR/advj"
+fi
+
+# 3. DAT files: Copy to ARCADE
+for dat_file in event.dat hiscore.dat history.dat cheat.dat; do
+    [ -f "support/$dat_file" ] && cp "support/$dat_file" "$OUT_DIR/"
+done
+
+# 4. Final Packaging
 cd "$OUTPUT_DIR"
-echo ">>> Packaging..."
+echo ">>> Packaging everything into advmame.64.7z..."
 rm -f advmame.64.7z
 7z a -t7z -m0=lzma2 -mx=9 advmame.64.7z Emu/
 
